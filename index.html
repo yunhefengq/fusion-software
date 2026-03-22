@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多源信息融合仿真教学软件 — 在线体验</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Serif+SC:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg0:#080c14;--bg1:#0f1520;--bg2:#161e2e;--bg3:#1c2640;--tx0:#e6ecf5;--tx1:#94a3bb;--tx2:#5a6a82;--ac1:#38bdf8;--ac2:#818cf8;--ac3:#34d399;--ac4:#fbbf24;--ac5:#f87171;--grd:linear-gradient(135deg,#38bdf8,#818cf8);--brd:rgba(255,255,255,.06);--r:12px;--rl:20px}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg0);color:var(--tx0);line-height:1.7;overflow-x:hidden}
+.container{max-width:1140px;margin:0 auto;padding:0 28px}
+section{padding:80px 0;position:relative}
+.stag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--ac1);margin-bottom:10px;display:block}
+.stitle{font-family:'Noto Serif SC',serif;font-size:clamp(26px,4vw,38px);font-weight:700;line-height:1.3;margin-bottom:14px;background:linear-gradient(135deg,var(--tx0) 30%,var(--ac1));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sdesc{font-size:15px;color:var(--tx1);max-width:640px;line-height:1.8}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(8,12,20,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--brd)}
+nav .container{display:flex;align-items:center;justify-content:space-between;height:60px}
+.nlogo{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;color:var(--tx0);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nlogo .dot{width:7px;height:7px;border-radius:50%;background:var(--ac1);box-shadow:0 0 8px var(--ac1)}
+.nlinks{display:flex;gap:24px;list-style:none}
+.nlinks a{color:var(--tx1);text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+.nlinks a:hover{color:var(--ac1)}
+@media(max-width:800px){.nlinks{display:none}}
+
+.hero{min-height:100vh;display:flex;align-items:center;background:linear-gradient(135deg,#111d35 0%,#080c14 50%,#150e28 100%);padding-top:60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-180px;right:-180px;width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,.07),transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:100px;border:1px solid rgba(56,189,248,.25);background:rgba(56,189,248,.06);font-size:12px;color:var(--ac1);margin-bottom:28px;font-family:'JetBrains Mono',monospace}
+.hero-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--ac3);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(52,211,153,.4)}50%{box-shadow:0 0 0 6px rgba(52,211,153,0)}}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:clamp(32px,5vw,56px);font-weight:700;line-height:1.2;margin-bottom:20px}
+.hero h1 .gt{background:linear-gradient(135deg,var(--ac1),var(--ac2),var(--ac3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(15px,1.8vw,18px);color:var(--tx1);max-width:560px;line-height:1.8;margin-bottom:36px;font-weight:300}
+.hero-cta{display:flex;gap:16px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;transition:all .25s;cursor:pointer;border:none}
+.btn-primary{background:var(--grd);color:#fff;box-shadow:0 4px 20px rgba(56,189,248,.25)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(56,189,248,.35)}
+.btn-ghost{background:transparent;color:var(--tx0);border:1px solid var(--brd)}
+.btn-ghost:hover{border-color:var(--ac1);color:var(--ac1)}
+
+/* FLOW */
+.flow-track{display:flex;gap:0;margin-top:48px}.flow-node{flex:1;text-align:center;padding:24px 12px;background:var(--bg2);border:1px solid var(--brd);position:relative;transition:all .3s;cursor:pointer}
+.flow-node:first-child{border-radius:var(--rl) 0 0 var(--rl)}.flow-node:last-child{border-radius:0 var(--rl) var(--rl) 0}
+.flow-node:hover{background:var(--bg3);border-color:rgba(56,189,248,.2);z-index:1}
+.flow-node .fn-icon{font-size:24px;margin-bottom:6px}.flow-node .fn-name{font-size:12px;font-weight:600}
+.flow-node .fn-layer{font-size:9px;padding:2px 6px;border-radius:4px;display:inline-block;margin-top:4px;font-family:'JetBrains Mono',monospace;letter-spacing:1px}
+.fl-basic{background:rgba(56,189,248,.12);color:var(--ac1)}.fl-method{background:rgba(129,140,248,.12);color:var(--ac2)}.fl-frontier{background:rgba(248,113,113,.12);color:var(--ac5)}
+.flow-arrow{position:absolute;right:-12px;top:50%;transform:translateY(-50%);z-index:2;color:var(--tx2);font-size:16px}
+@media(max-width:700px){.flow-track{flex-wrap:wrap}.flow-node{flex:none;width:calc(50% - 1px);border-radius:0!important}.flow-arrow{display:none}}
+#flowTip{margin-top:14px;padding:12px 16px;background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r);font-size:13px;color:var(--tx1);display:none}
+
+/* DEMO BOXES */
+.demo-section{background:var(--bg1)}
+.demos-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:40px}
+@media(max-width:860px){.demos-grid{grid-template-columns:1fr}}
+.demo-full{grid-column:1/-1}
+.demo-box{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--rl);overflow:hidden;display:flex;flex-direction:column}
+.demo-header{padding:18px 22px 0;display:flex;justify-content:space-between;align-items:center}
+.demo-header h3{font-size:16px;font-weight:700}.demo-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;padding:3px 8px;border-radius:4px;background:rgba(56,189,248,.1);color:var(--ac1)}
+.demo-body{padding:16px 22px 22px;flex:1;display:flex;flex-direction:column}
+.demo-controls{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:flex-end}
+.ctrl-group{display:flex;flex-direction:column;gap:3px}
+.ctrl-group label{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:1px}
+.ctrl-group select,.ctrl-group input[type=number]{background:var(--bg0);border:1px solid var(--brd);color:var(--tx0);padding:7px 10px;border-radius:6px;font-size:13px;font-family:'Noto Sans SC',sans-serif;outline:none}
+.ctrl-group select:focus,.ctrl-group input:focus{border-color:var(--ac1)}
+.ctrl-group input[type=range]{width:120px;accent-color:var(--ac1)}
+.demo-btn{padding:7px 16px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'Noto Sans SC',sans-serif}
+.demo-btn-run{background:var(--grd);color:#fff}.demo-btn-run:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(56,189,248,.3)}
+.demo-btn-reset{background:rgba(255,255,255,.06);color:var(--tx1);border:1px solid var(--brd)}.demo-btn-reset:hover{border-color:var(--ac5);color:var(--ac5)}
+.demo-canvas-wrap{flex:1;min-height:240px;position:relative;background:var(--bg0);border-radius:var(--r);overflow:hidden}
+.demo-canvas-wrap canvas{width:100%!important;height:100%!important}
+.demo-result{margin-top:12px;padding:12px;background:var(--bg0);border-radius:var(--r);font-size:13px;color:var(--tx1);line-height:1.6}
+.result-label{color:var(--ac3);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:12px}
+.result-value{color:var(--tx0);font-weight:500}
+
+/* DS TABLE */
+.ds-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:10px}
+.ds-table th,.ds-table td{padding:5px 7px;text-align:center;border:1px solid var(--brd)}
+.ds-table th{background:var(--bg0);color:var(--tx2);font-size:10px;text-transform:uppercase;letter-spacing:1px}
+.ds-table input{width:56px;background:var(--bg0);border:1px solid var(--brd);color:var(--tx0);padding:4px;border-radius:4px;text-align:center;font-size:13px;font-family:'JetBrains Mono',monospace}
+.ds-table input:focus{border-color:var(--ac1);outline:none}
+
+
+
+footer{padding:40px 0;border-top:1px solid var(--brd);text-align:center}
+footer p{font-size:12px;color:var(--tx2);line-height:1.8}
+.fi{opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s}.fi.vis{opacity:1;transform:translateY(0)}
+
+/* CWT heatmap canvas */
+.cwt-wrap{position:relative;width:100%;height:100%;min-height:240px}
+.cwt-wrap canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <a href="#" class="nlogo"><span class="dot"></span>多源信息融合仿真教学软件</a>
+    <ul class="nlinks">
+      <li><a href="#flow">教学链路</a></li>
+      <li><a href="#demos">在线体验</a></li>
+
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container"><div class="fi">
+    <div class="hero-badge"><span class="pulse"></span>Interactive Experience Platform</div>
+    <h1>在线体验<br><span class="gt">多源信息融合仿真教学</span></h1>
+    <p class="hero-sub">无需安装，直接在浏览器中体验D-S证据融合、振动信号分析、CWT时频图、t-SNE特征可视化、开放集阈值分析等核心教学模块。</p>
+    <div class="hero-cta">
+      <a href="#demos" class="btn btn-primary">🧪 立即体验在线演示</a>
+
+    </div>
+  </div></div>
+</section>
+
+<!-- FLOW -->
+<section id="flow">
+  <div class="container">
+    <span class="stag fi">Teaching Pipeline</span>
+    <h2 class="stitle fi">七步贯通的仿真教学链路</h2>
+    <p class="sdesc fi">点击各节点查看功能简介。带 ⚡ 标记的模块可在下方直接在线体验。</p>
+    <div class="flow-track fi">
+      <div class="flow-node" onclick="showFT(this,'信号浏览：内置6个数据集，支持FFT频谱、包络谱、17项统计特征。⚡ 下方可在线体验频谱分析')"><div class="fn-icon">📊</div><div class="fn-name">信号浏览</div><span class="fn-layer fl-basic">基础认知</span><span class="flow-arrow">→</span></div>
+      <div class="flow-node" onclick="showFT(this,'数据混合：SOS信号叠加 + NIN噪声注入，生成开放集辅助训练样本')"><div class="fn-icon">🔀</div><div class="fn-name">数据混合</div><span class="fn-layer fl-basic">基础认知</span><span class="flow-arrow">→</span></div>
+      <div class="flow-node" onclick="showFT(this,'时频分析：CWT时频图、灰度图生成、范数统计指标。⚡ 下方可在线体验CWT热力图')"><div class="fn-icon">🌊</div><div class="fn-name">时频分析</div><span class="fn-layer fl-basic">基础认知</span><span class="flow-arrow">→</span></div>
+      <div class="flow-node" onclick="showFT(this,'深度学习：6种诊断模型，Grad-CAM + t-SNE可视化。⚡ 下方可在线体验t-SNE')"><div class="fn-icon">🧠</div><div class="fn-name">深度学习</div><span class="fn-layer fl-method">方法应用</span><span class="flow-arrow">→</span></div>
+      <div class="flow-node" onclick="showFT(this,'D-S融合：改进证据理论，BPA计算、冲突消解、分步演示。⚡ 下方可在线体验')"><div class="fn-icon">⚖️</div><div class="fn-name">D-S融合</div><span class="fn-layer fl-method">方法应用</span><span class="flow-arrow">→</span></div>
+      <div class="flow-node" onclick="showFT(this,'开放集诊断：EAC分类器，不确定性量化与阈值分析。⚡ 下方可在线体验阈值分析')"><div class="fn-icon">❓</div><div class="fn-name">开放集诊断</div><span class="fn-layer fl-frontier">前沿探索</span><span class="flow-arrow">→</span></div>
+      <div class="flow-node" onclick="showFT(this,'工业仿真：煤磨机传动链4测点真实数据(51.2kHz)，多源融合对比')"><div class="fn-icon">🏭</div><div class="fn-name">工业仿真</div><span class="fn-layer fl-frontier">前沿探索</span></div>
+    </div>
+    <div id="flowTip"></div>
+  </div>
+</section>
+
+<!-- DEMOS -->
+<section id="demos" class="demo-section">
+  <div class="container">
+    <span class="stag fi">Live Demos — 5 Interactive Modules</span>
+    <h2 class="stitle fi">在线交互体验</h2>
+    <p class="sdesc fi">覆盖教学链路中5个核心模块的简化演示。完整功能请参阅软件详细使用手册。</p>
+
+    <div class="demos-grid">
+
+<!-- DEMO 1: D-S -->
+<div class="demo-box fi">
+  <div class="demo-header"><h3>⚖️ D-S证据融合</h3><span class="demo-tag">模块5</span></div>
+  <div class="demo-body">
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">输入BPA值，对比标准D-S与改进算法在高冲突场景下的融合效果差异。</p>
+    <div style="display:flex;gap:8px;margin-bottom:10px"><button class="demo-btn demo-btn-reset" onclick="loadDSEx()">📖 加载论文算例</button><button class="demo-btn demo-btn-reset" onclick="resetDS()">清空</button></div>
+    <table class="ds-table"><thead><tr><th>证据源</th><th>故障A</th><th>故障B</th><th>故障C</th></tr></thead><tbody>
+      <tr><td>证据1</td><td><input id="e1a" value="0.30"></td><td><input id="e1b" value="0.35"></td><td><input id="e1c" value="0.35"></td></tr>
+      <tr><td>证据2</td><td><input id="e2a" value="0.00"></td><td><input id="e2b" value="0.90"></td><td><input id="e2c" value="0.10"></td></tr>
+      <tr><td>证据3</td><td><input id="e3a" value="0.58"></td><td><input id="e3b" value="0.07"></td><td><input id="e3c" value="0.35"></td></tr>
+    </tbody></table>
+    <button class="demo-btn demo-btn-run" onclick="runDS()" style="width:100%;padding:9px;margin-bottom:12px">▶ 执行融合计算</button>
+    <div class="demo-canvas-wrap" style="min-height:200px"><canvas id="dsChart"></canvas></div>
+    <div class="demo-result" id="dsR"><span style="color:var(--tx2)">点击"执行融合计算"查看对比结果</span></div>
+  </div>
+</div>
+
+<!-- DEMO 2: Signal -->
+<div class="demo-box fi">
+  <div class="demo-header"><h3>📊 振动信号频谱分析</h3><span class="demo-tag">模块1</span></div>
+  <div class="demo-body">
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">切换故障类型，观察时域波形与FFT频谱的特征差异。</p>
+    <div class="demo-controls">
+      <div class="ctrl-group"><label>故障类型</label><select id="sigType" onchange="updateSig()"><option value="normal">正常信号</option><option value="inner">内圈故障</option><option value="outer">外圈故障</option><option value="ball">滚动体故障</option></select></div>
+      <div class="ctrl-group"><label>噪声强度</label><input type="range" id="sigNoise" min="0" max="100" value="15" oninput="updateSig()"></div>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:6px;flex:1">
+      <div class="demo-canvas-wrap" style="min-height:120px"><canvas id="sigT"></canvas></div>
+      <div class="demo-canvas-wrap" style="min-height:120px"><canvas id="sigF"></canvas></div>
+    </div>
+    <div class="demo-result" id="sigR"><span style="color:var(--tx2)">选择不同故障类型观察变化</span></div>
+  </div>
+</div>
+
+<!-- DEMO 3: CWT -->
+<div class="demo-box fi">
+  <div class="demo-header"><h3>🌊 CWT时频图分析</h3><span class="demo-tag">模块3</span></div>
+  <div class="demo-body">
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">观察不同故障类型在时间-频率平面上的能量分布差异（连续小波变换热力图）。</p>
+    <div class="demo-controls">
+      <div class="ctrl-group"><label>故障类型</label><select id="cwtType" onchange="updateCWT()"><option value="normal">正常信号</option><option value="inner">内圈故障</option><option value="outer">外圈故障</option><option value="ball">滚动体故障</option></select></div>
+      <div class="ctrl-group"><label>频率分辨率</label><select id="cwtRes" onchange="updateCWT()"><option value="32">32 scales</option><option value="64" selected>64 scales</option></select></div>
+    </div>
+    <div class="demo-canvas-wrap" style="min-height:260px"><canvas id="cwtCanvas"></canvas></div>
+    <div class="demo-result" id="cwtR"><span style="color:var(--tx2)">热力图展示信号能量在时间-频率平面的分布</span></div>
+  </div>
+</div>
+
+<!-- DEMO 4: t-SNE -->
+<div class="demo-box fi">
+  <div class="demo-header"><h3>🧠 t-SNE特征可视化</h3><span class="demo-tag">模块4</span></div>
+  <div class="demo-body">
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">模拟深度学习模型提取的高维特征经t-SNE降维后的聚类效果，观察不同故障类型的可分性。</p>
+    <div class="demo-controls">
+      <div class="ctrl-group"><label>故障类别数</label><select id="tsneClasses" onchange="updateTSNE()"><option value="3">3类</option><option value="4" selected>4类</option><option value="6">6类</option></select></div>
+      <div class="ctrl-group"><label>类间分离度</label><input type="range" id="tsneSep" min="1" max="10" value="6" oninput="updateTSNE()"></div>
+      <div class="ctrl-group"><label>每类样本数</label><select id="tsneN" onchange="updateTSNE()"><option value="30">30</option><option value="60" selected>60</option><option value="100">100</option></select></div>
+    </div>
+    <div class="demo-canvas-wrap" style="min-height:280px"><canvas id="tsneCanvas"></canvas></div>
+    <div class="demo-result" id="tsneR"><span style="color:var(--tx2)">调节参数观察聚类效果变化</span></div>
+  </div>
+</div>
+
+<!-- DEMO 5: Open-set threshold (full width) -->
+<div class="demo-box demo-full fi">
+  <div class="demo-header"><h3>❓ 开放集诊断 — 不确定性阈值分析</h3><span class="demo-tag">模块6</span></div>
+  <div class="demo-body">
+    <p style="font-size:12px;color:var(--tx2);margin-bottom:10px">拖动阈值滑块，实时观察已知类准确率与未知类拒识率之间的权衡关系。这是开放集故障诊断的核心决策问题。</p>
+    <div class="demo-controls">
+      <div class="ctrl-group"><label>不确定性阈值 τ = <span id="thrVal">0.50</span></label><input type="range" id="thrSlider" min="0" max="100" value="50" oninput="updateThr()" style="width:300px"></div>
+      <div class="ctrl-group"><label>未知类比例</label><select id="thrUnk" onchange="updateThr()"><option value="0.1">10%</option><option value="0.2" selected>20%</option><option value="0.4">40%</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="demo-canvas-wrap" style="min-height:260px"><canvas id="thrChart"></canvas></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="demo-result" style="flex:1" id="thrR1">
+          <span class="result-label">当前阈值分析</span><br>
+          <span style="color:var(--tx2)">拖动滑块查看变化</span>
+        </div>
+        <div class="demo-result" style="flex:1" id="thrR2">
+          <span class="result-label">教学启示</span><br>
+          <span style="color:var(--tx2)">阈值越高 → 更多样本被拒识为"未知" → 已知类准确率上升但覆盖率下降</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    </div>
+  </div>
+</section>
+
+
+
+<footer>
+  <div class="container">
+    <p style="font-family:'Noto Serif SC',serif;font-size:14px;color:var(--tx1);margin-bottom:6px">面向复杂装备预测性维护的多源信息融合仿真教学软件开发与实践</p>
+    <p>福耀科技大学 · 沈阳工业大学 · 东北大学</p>
+
+  </div>
+</footer>
+
+<script>
+// ===== Scroll animation =====
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')})},{threshold:.08});
+document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+
+// ===== Flow tip =====
+function showFT(n,t){const tip=document.getElementById('flowTip');tip.innerHTML='<b style="color:var(--ac1)">'+n.querySelector('.fn-name').textContent+'</b> — '+t;tip.style.display='block';document.querySelectorAll('.flow-node').forEach(x=>x.style.borderColor='var(--brd)');n.style.borderColor='rgba(56,189,248,.4)'}
+
+// ===== Helpers =====
+function gv(id){return parseFloat(document.getElementById(id).value)||0}
+
+// ===== DEMO 1: D-S Fusion =====
+let dsC=null;
+function loadDSEx(){document.getElementById('e1a').value='0.30';document.getElementById('e1b').value='0.35';document.getElementById('e1c').value='0.35';document.getElementById('e2a').value='0.00';document.getElementById('e2b').value='0.90';document.getElementById('e2c').value='0.10';document.getElementById('e3a').value='0.58';document.getElementById('e3b').value='0.07';document.getElementById('e3c').value='0.35'}
+function resetDS(){['e1a','e1b','e1c','e2a','e2b','e2c','e3a','e3b','e3c'].forEach(id=>document.getElementById(id).value='');if(dsC){dsC.destroy();dsC=null}document.getElementById('dsR').innerHTML='<span style="color:var(--tx2)">已清空</span>'}
+function dsF(evs){let m=evs[0].slice();for(let i=1;i<evs.length;i++){const m2=evs[i];let k=0,nm=[0,0,0];for(let a=0;a<3;a++)for(let b=0;b<3;b++){if(a===b)nm[a]+=m[a]*m2[b];else k+=m[a]*m2[b]}if(k>=1)return null;const n=1-k;m=nm.map(v=>v/n)}return m}
+function dsI(evs){const n=evs.length;const w=evs.map(e=>{const h=-e.reduce((s,p)=>s+(p>0?p*Math.log(p+1e-10):0),0);return 1/(1+h)});const ws=w.reduce((a,b)=>a+b,0);const nw=w.map(x=>x/ws);const avg=[0,0,0];for(let i=0;i<n;i++)for(let j=0;j<3;j++)avg[j]+=nw[i]*evs[i][j];let m=avg.slice();for(let i=0;i<n-1;i++){let k=0,nm=[0,0,0];for(let a=0;a<3;a++)for(let b=0;b<3;b++){if(a===b)nm[a]+=m[a]*avg[b];else k+=m[a]*avg[b]}if(k>=1)return null;const nr=1-k;m=nm.map(v=>v/nr)}return m}
+function runDS(){const ev=[[gv('e1a'),gv('e1b'),gv('e1c')],[gv('e2a'),gv('e2b'),gv('e2c')],[gv('e3a'),gv('e3b'),gv('e3c')]];for(let i=0;i<3;i++){const s=ev[i].reduce((a,b)=>a+b,0);if(Math.abs(s-1)>.05){document.getElementById('dsR').innerHTML='<span style="color:var(--ac5)">⚠ 证据'+(i+1)+'的BPA之和='+ s.toFixed(2)+' ≠ 1</span>';return}}
+const std=dsF(ev),imp=dsI(ev);if(!std||!imp){document.getElementById('dsR').innerHTML='<span style="color:var(--ac5)">⚠ 冲突过大</span>';return}
+const ctx=document.getElementById('dsChart').getContext('2d');if(dsC)dsC.destroy();
+dsC=new Chart(ctx,{type:'bar',data:{labels:['故障A','故障B','故障C'],datasets:[{label:'标准D-S',data:std.map(v=>+(v*100).toFixed(1)),backgroundColor:'rgba(248,113,113,.7)',borderRadius:4},{label:'改进算法',data:imp.map(v=>+(v*100).toFixed(1)),backgroundColor:'rgba(56,189,248,.7)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#94a3bb',font:{size:11}}}},scales:{x:{ticks:{color:'#5a6a82'},grid:{color:'rgba(255,255,255,.03)'}},y:{ticks:{color:'#5a6a82',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.03)'},max:100}}}});
+let k=0;for(let a=0;a<3;a++)for(let b=0;b<3;b++){if(a!==b)k+=ev[0][a]*ev[1][b]}
+const sM=Math.max(...std),iM=Math.max(...imp),sL=['A','B','C'][std.indexOf(sM)],iL=['A','B','C'][imp.indexOf(iM)];
+document.getElementById('dsR').innerHTML='<span class="result-label">融合结果</span><br>标准D-S → 故障<span class="result-value">'+sL+'</span>（'+( sM*100).toFixed(1)+'%）| 改进 → 故障<span class="result-value">'+iL+'</span>（'+(iM*100).toFixed(1)+'%）<br><span style="color:var(--ac4)">冲突度 K='+k.toFixed(3)+'</span>'+(k>.5?' <span style="color:var(--ac5)">高冲突</span>':'')}
+
+// ===== DEMO 2: Signal =====
+let sigTI=null,sigFI=null;
+function genSig(type,N,nl){const fs=12000,dt=1/fs,noise=nl/100*.5,t=Array.from({length:N},(_,i)=>i*dt);let s=new Array(N).fill(0);const fS=30;for(let i=0;i<N;i++){s[i]=.3*Math.sin(2*Math.PI*fS*t[i])+.15*Math.sin(2*Math.PI*2*fS*t[i])}
+if(type==='inner'){const f=162;for(let i=0;i<N;i++){const m=.5*(1+Math.sin(2*Math.PI*fS*t[i]));s[i]+=m*.6*Math.sin(2*Math.PI*f*t[i])+m*.3*Math.sin(2*Math.PI*2*f*t[i])}}
+else if(type==='outer'){const f=107;for(let i=0;i<N;i++){s[i]+=.7*Math.sin(2*Math.PI*f*t[i])+.4*Math.sin(2*Math.PI*2*f*t[i])+.2*Math.sin(2*Math.PI*3*f*t[i])}}
+else if(type==='ball'){const f=70;for(let i=0;i<N;i++){s[i]+=.4*Math.sin(2*Math.PI*f*t[i])+.5*Math.sin(2*Math.PI*2*f*t[i])}}
+for(let i=0;i<N;i++)s[i]+=(Math.random()-.5)*2*noise;return{t,sig:s,fs}}
+function doFFT(sig){const N=sig.length,mag=new Array(N/2).fill(0);for(let k=0;k<N/2;k++){let re=0,im=0;for(let n=0;n<N;n++){const a=-2*Math.PI*k*n/N;re+=sig[n]*Math.cos(a);im+=sig[n]*Math.sin(a)}mag[k]=2*Math.sqrt(re*re+im*im)/N}return mag}
+function updateSig(){const type=document.getElementById('sigType').value,nl=+document.getElementById('sigNoise').value;const{t,sig,fs}=genSig(type,1024,nl);
+const step=4,tL=t.filter((_,i)=>i%step===0).map(v=>(v*1000).toFixed(1)),tD=sig.filter((_,i)=>i%step===0);
+const ctx1=document.getElementById('sigT').getContext('2d');if(sigTI)sigTI.destroy();
+sigTI=new Chart(ctx1,{type:'line',data:{labels:tL,datasets:[{data:tD,borderColor:'rgba(56,189,248,.8)',borderWidth:1,pointRadius:0,fill:false,tension:0}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:200},plugins:{legend:{display:false},title:{display:true,text:'时域波形',color:'#5a6a82',font:{size:10}}},scales:{x:{ticks:{color:'#5a6a82',maxTicksLimit:5,font:{size:8}},grid:{color:'rgba(255,255,255,.03)'}},y:{ticks:{color:'#5a6a82',font:{size:8}},grid:{color:'rgba(255,255,255,.03)'}}}}});
+const mag=doFFT(sig),freqs=Array.from({length:mag.length},(_,i)=>i*fs/1024),mi=Math.floor(1000*1024/fs),fS=Math.max(1,Math.floor(mi/200)),fL=freqs.slice(0,mi).filter((_,i)=>i%fS===0).map(v=>v.toFixed(0)),fD=mag.slice(0,mi).filter((_,i)=>i%fS===0);
+const ctx2=document.getElementById('sigF').getContext('2d');if(sigFI)sigFI.destroy();
+sigFI=new Chart(ctx2,{type:'line',data:{labels:fL,datasets:[{data:fD,borderColor:'rgba(129,140,248,.8)',borderWidth:1,pointRadius:0,fill:true,backgroundColor:'rgba(129,140,248,.08)',tension:0}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:200},plugins:{legend:{display:false},title:{display:true,text:'FFT频谱',color:'#5a6a82',font:{size:10}}},scales:{x:{ticks:{color:'#5a6a82',maxTicksLimit:6,font:{size:8}},grid:{color:'rgba(255,255,255,.03)'}},y:{ticks:{color:'#5a6a82',font:{size:8}},grid:{color:'rgba(255,255,255,.03)'}}}}});
+const desc={normal:'正常信号：仅有轴转频(30Hz)及谐波',inner:'内圈故障：出现BPFI≈162Hz及调制',outer:'外圈故障：出现BPFO≈107Hz及高次谐波',ball:'滚动体故障：出现BSF≈70Hz及2倍频'};
+document.getElementById('sigR').innerHTML='<span class="result-label">特征</span> '+desc[type]}
+
+// ===== DEMO 3: CWT Heatmap =====
+function updateCWT(){const type=document.getElementById('cwtType').value,nScales=+document.getElementById('cwtRes').value;
+const{sig}=genSig(type,512,10);const N=sig.length;
+const canvas=document.getElementById('cwtCanvas');const ctx=canvas.getContext('2d');
+const W=canvas.parentElement.clientWidth||500,H=canvas.parentElement.clientHeight||260;
+canvas.width=W;canvas.height=H;
+// Compute CWT using Morlet-like wavelet
+const scales=Array.from({length:nScales},(_,i)=>2+i*2);
+const cwt=[];let maxVal=0;
+for(let si=0;si<scales.length;si++){const row=[];const s=scales[si];
+for(let t=0;t<N;t++){let re=0,im=0;for(let k=Math.max(0,t-s*3);k<Math.min(N,t+s*3);k++){const u=(k-t)/s;const env=Math.exp(-u*u/2);re+=sig[k]*env*Math.cos(5*u);im+=sig[k]*env*Math.sin(5*u)}
+const mag=Math.sqrt(re*re+im*im)/Math.sqrt(s);row.push(mag);if(mag>maxVal)maxVal=mag}cwt.push(row)}
+// Draw heatmap
+const imgData=ctx.createImageData(W,H);
+for(let py=0;py<H;py++){const si=Math.floor(py/H*nScales);if(si>=cwt.length)continue;
+for(let px=0;px<W;px++){const ti=Math.floor(px/W*N);if(ti>=cwt[0].length)continue;
+const v=cwt[si][ti]/maxVal;const idx=(py*W+px)*4;
+// Viridis-like colormap
+const r=Math.floor(68+v*180);const g=Math.floor(1+v*220-v*v*150);const b=Math.floor(84+v*80-v*v*120);
+imgData.data[idx]=Math.min(255,Math.max(0,r));imgData.data[idx+1]=Math.min(255,Math.max(0,g));imgData.data[idx+2]=Math.min(255,Math.max(0,b));imgData.data[idx+3]=255}}
+ctx.putImageData(imgData,0,0);
+// Labels
+ctx.fillStyle='#94a3bb';ctx.font='10px JetBrains Mono';
+ctx.fillText('← 时间 →',W/2-25,H-4);ctx.save();ctx.translate(12,H/2);ctx.rotate(-Math.PI/2);ctx.fillText('← 频率(尺度) →',-35,0);ctx.restore();
+const desc={normal:'正常：能量均匀分布，无突变',inner:'内圈故障：可见周期性冲击能量条带',outer:'外圈故障：规律性高能量脉冲带',ball:'滚动体故障：间歇性能量分布'};
+document.getElementById('cwtR').innerHTML='<span class="result-label">CWT分析</span> '+desc[type]}
+
+// ===== DEMO 4: t-SNE =====
+let tsneChart=null;
+function updateTSNE(){const nC=+document.getElementById('tsneClasses').value,sep=+document.getElementById('tsneSep').value,nPts=+document.getElementById('tsneN').value;
+const colors=['rgba(56,189,248,.7)','rgba(248,113,113,.7)','rgba(52,211,153,.7)','rgba(251,191,36,.7)','rgba(129,140,248,.7)','rgba(244,114,182,.7)'];
+const labels=['正常','内圈故障','外圈故障','滚动体故障','齿面磨损','轴不对中'];
+const datasets=[];const spread=sep*1.5;
+for(let c=0;c<nC;c++){const cx=(Math.cos(2*Math.PI*c/nC))*spread*5;const cy=(Math.sin(2*Math.PI*c/nC))*spread*5;
+const data=[];for(let i=0;i<nPts;i++){data.push({x:cx+(Math.random()-.5)*20/Math.sqrt(sep),y:cy+(Math.random()-.5)*20/Math.sqrt(sep)})}
+datasets.push({label:labels[c],data,backgroundColor:colors[c],pointRadius:3.5,pointHoverRadius:5})}
+const ctx=document.getElementById('tsneCanvas').getContext('2d');if(tsneChart)tsneChart.destroy();
+tsneChart=new Chart(ctx,{type:'scatter',data:{datasets},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},plugins:{legend:{labels:{color:'#94a3bb',font:{size:11},usePointStyle:true,pointStyle:'circle'},position:'top'}},scales:{x:{title:{display:true,text:'t-SNE维度1',color:'#5a6a82',font:{size:10}},ticks:{color:'#5a6a82',font:{size:8}},grid:{color:'rgba(255,255,255,.03)'}},y:{title:{display:true,text:'t-SNE维度2',color:'#5a6a82',font:{size:10}},ticks:{color:'#5a6a82',font:{size:8}},grid:{color:'rgba(255,255,255,.03)'}}}}});
+const sepDesc=sep<=3?'低分离度：类别重叠严重，模型判别困难':sep<=6?'中等分离度：部分类别可区分':' 高分离度：各故障类别清晰可分';
+document.getElementById('tsneR').innerHTML='<span class="result-label">聚类分析</span> '+nC+'类 × '+nPts+'样本 | '+sepDesc}
+
+// ===== DEMO 5: Open-set Threshold =====
+let thrChartI=null;
+function updateThr(){const tau=+document.getElementById('thrSlider').value/100;document.getElementById('thrVal').textContent=tau.toFixed(2);
+const unkRatio=+document.getElementById('thrUnk').value;
+// Simulate accuracy curves
+const taus=Array.from({length:51},(_,i)=>i/50);
+const knownAcc=taus.map(t=>{const base=92-t*25;return Math.max(50,Math.min(99,base+(Math.random()-.5)*2))});
+const unkReject=taus.map(t=>{const base=10+t*85;return Math.max(5,Math.min(99,base+(Math.random()-.5)*3))});
+const overallAcc=taus.map((t,i)=>{const ka=knownAcc[i]/100,ur=unkReject[i]/100;return((1-unkRatio)*ka+unkRatio*ur)*100});
+// Smooth
+for(let pass=0;pass<3;pass++){for(let i=1;i<taus.length-1;i++){knownAcc[i]=(knownAcc[i-1]+knownAcc[i]*2+knownAcc[i+1])/4;unkReject[i]=(unkReject[i-1]+unkReject[i]*2+unkReject[i+1])/4;overallAcc[i]=(overallAcc[i-1]+overallAcc[i]*2+overallAcc[i+1])/4}}
+
+const ctx=document.getElementById('thrChart').getContext('2d');if(thrChartI)thrChartI.destroy();
+thrChartI=new Chart(ctx,{type:'line',data:{labels:taus.map(t=>t.toFixed(2)),datasets:[
+{label:'已知类准确率',data:knownAcc,borderColor:'rgba(56,189,248,.8)',borderWidth:2,pointRadius:0,fill:false,tension:.3},
+{label:'未知类拒识率',data:unkReject,borderColor:'rgba(248,113,113,.8)',borderWidth:2,pointRadius:0,fill:false,tension:.3},
+{label:'综合性能',data:overallAcc,borderColor:'rgba(52,211,153,.8)',borderWidth:2,pointRadius:0,fill:false,tension:.3,borderDash:[5,3]}
+]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:200},plugins:{legend:{labels:{color:'#94a3bb',font:{size:11}}},annotation:{}},scales:{x:{title:{display:true,text:'不确定性阈值 τ',color:'#5a6a82',font:{size:10}},ticks:{color:'#5a6a82',maxTicksLimit:6,font:{size:8}},grid:{color:'rgba(255,255,255,.03)'}},y:{title:{display:true,text:'比率 (%)',color:'#5a6a82',font:{size:10}},ticks:{color:'#5a6a82',font:{size:8}},grid:{color:'rgba(255,255,255,.03)'},min:0,max:100}}}});
+
+// Draw vertical line for current tau
+const tauIdx=Math.round(tau*50);
+const ka=knownAcc[tauIdx]||0,ur=unkReject[tauIdx]||0,oa=overallAcc[tauIdx]||0;
+document.getElementById('thrR1').innerHTML='<span class="result-label">阈值 τ = '+tau.toFixed(2)+'</span><br>已知类准确率：<span class="result-value">'+ka.toFixed(1)+'%</span><br>未知类拒识率：<span class="result-value">'+ur.toFixed(1)+'%</span><br>综合性能：<span class="result-value">'+oa.toFixed(1)+'%</span>';
+const advice=tau<.3?'阈值过低：几乎不拒识，未知故障将被误判为已知类':tau<.7?'适中阈值：在准确率和拒识率之间取得平衡':'阈值偏高：大量样本被拒识，已知类覆盖率下降';
+document.getElementById('thrR2').innerHTML='<span class="result-label">教学启示</span><br>'+advice+'<br><span style="color:var(--tx2);font-size:12px">这体现了开放集诊断中"宁可拒识也不误判"的工程决策思想。</span>'}
+
+// Init all demos
+window.addEventListener('load',()=>{setTimeout(()=>{updateSig();updateCWT();updateTSNE();updateThr()},400)});
+</script>
+</body>
+</html>
